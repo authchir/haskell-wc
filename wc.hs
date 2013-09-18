@@ -12,12 +12,15 @@ main = do
     args <- getArgs
     case args of
         [] -> putStrLn "Usage: wc file..."
-        files -> do
-            contents <- mapM readFile files
-            let stats = wcAll contents
-                padding = maxPadding stats
-                allStats = formatWcAll padding files stats
-            putStrLn $ intercalate "\n" allStats
+        [file] -> fmap (wcFile file) (readFile file) >>= putStrLn
+        files -> fmap (wcFiles files) (mapM readFile files) >>= putStrLn
+    where wcFile name content = (intercalate "\n" . init . processContents [name]) [content]
+          wcFiles names = intercalate "\n" . processContents names
+
+processContents :: [FilePath] -> [String] -> [String]
+processContents files contents = formatWcAll padding files stats
+    where stats = wcAll contents
+          padding = maxPadding stats
 
 wc :: String -> (LineCount,WordCount,CharCount)
 wc content = (l,w,c)
@@ -39,5 +42,5 @@ formatWcAll padding files stats = filesStats ++ [totalStats]
           addTriples (a,b,c) (d,e,f) = (a+d,b+e,c+f)
 
 maxPadding :: [(LineCount,WordCount,CharCount)] -> Int
-maxPadding = foldr calcPadding 0
-    where calcPadding (_,_,c) = max $ (length . show) c
+maxPadding = foldr f 0
+    where f (_,_,c) = max $ (length . show) c

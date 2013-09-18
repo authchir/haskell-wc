@@ -1,3 +1,4 @@
+import Data.List
 import System.Environment
 import Text.Printf
 
@@ -12,11 +13,12 @@ main = do
         [] -> putStrLn "Usage: wc file..."
         files -> do
             contents <- mapM readFile files
-            stats <- return $ map wc contents
-            padding <- return $ maxPadding stats
-            mapM_ (putStrLn . uncurry (formatWc padding)) $ zip files stats
-            totalStats <- return $ foldr addTriples (0,0,0) stats
-            putStrLn $ formatWc padding "total" totalStats
+            let stats = map wc contents
+                padding = maxPadding stats
+                filesStats = map (uncurry (formatWc padding)) $ zip files stats
+                totalStats = formatWc padding "total" $ foldr addTriples (0,0,0) stats
+                allStats = filesStats ++ [totalStats]
+            putStrLn $ intercalate "\n" allStats
             where addTriples (a,b,c) (d,e,f) = (a+d,b+e,c+f)
 
 wc :: String -> (LineCount,WordCount,CharCount)

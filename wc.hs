@@ -14,7 +14,7 @@ main = do
         [] -> putStrLn "Usage: wc file..."
         [file] -> fmap (wcFile file) (readFile file) >>= putStrLn
         files -> fmap (wcFiles files) (mapM readFile files) >>= putStrLn
-    where wcFile name content = (intercalate "\n" . init . processContents [name]) [content]
+    where wcFile name = intercalate "\n" . init . processContents [name] . (:[])
           wcFiles names = intercalate "\n" . processContents names
 
 processContents :: [FilePath] -> [String] -> [String]

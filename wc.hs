@@ -41,6 +41,6 @@ formatWcAll padding files stats = filesStats ++ [totalStats]
           formatWc' = uncurry (formatWc padding)
           addTriples (a,b,c) (d,e,f) = (a+d,b+e,c+f)
 
-maxPadding :: [(LineCount,WordCount,CharCount)] -> Int
+maxPadding :: [(LineCount,WordCount,CharCount)] -> Padding
 maxPadding = foldr f 0
     where f (_,_,c) = max $ (length . show) c

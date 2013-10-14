@@ -1,10 +1,13 @@
+import qualified Data.ByteString.Lazy as BS
+import qualified Data.ByteString.Lazy.Char8 as BSChar8
+import Data.Int
 import Data.List
 import System.Environment
 import Text.Printf
 
-type LineCount = Int
-type WordCount = Int
-type CharCount = Int
+type LineCount = Int64
+type WordCount = Int64
+type CharCount = Int64
 type Padding = Int
 
 main :: IO ()
@@ -12,23 +15,23 @@ main = do
     args <- getArgs
     case args of
         [] -> putStrLn "Usage: wc file..."
-        [file] -> fmap (wcFile file) (readFile file) >>= putStrLn
-        files -> fmap (wcFiles files) (mapM readFile files) >>= putStrLn
+        [file] -> fmap (wcFile file) (BS.readFile file) >>= putStrLn
+        files -> fmap (wcFiles files) (mapM BS.readFile files) >>= putStrLn
     where wcFile name = intercalate "\n" . init . processContents [name] . (:[])
           wcFiles names = intercalate "\n" . processContents names
 
-processContents :: [FilePath] -> [String] -> [String]
+processContents :: [FilePath] -> [BS.ByteString] -> [String]
 processContents files contents = formatWcAll padding files stats
     where stats = wcAll contents
           padding = maxPadding stats
 
-wc :: String -> (LineCount,WordCount,CharCount)
+wc :: BS.ByteString -> (LineCount,WordCount,CharCount)
 wc content = (l,w,c)
-    where l= (length . lines) content
-          w= (length . words) content
-          c= length content
+    where l= (fromIntegral . length . BSChar8.lines) content
+          w= (fromIntegral . length . BSChar8.words) content
+          c= BS.length content
 
-wcAll :: [String] -> [(LineCount,WordCount,CharCount)]
+wcAll :: [BS.ByteString] -> [(LineCount,WordCount,CharCount)]
 wcAll = map wc
 
 formatWc :: Padding -> FilePath -> (LineCount,WordCount,CharCount) -> String

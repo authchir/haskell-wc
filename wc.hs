@@ -14,7 +14,7 @@ main :: IO ()
 main = do
     args <- getArgs
     case args of
-        [] -> putStrLn "Usage: wc file..."
+        [] -> fmap (("usage: "++) . (++" file...")) getProgName >>= putStrLn
         [file] -> fmap (wcFile file) (BS.readFile file) >>= putStrLn
         files -> fmap (wcFiles files) (mapM BS.readFile files) >>= putStrLn
     where wcFile name = intercalate "\n" . init . processContents [name] . (:[])
